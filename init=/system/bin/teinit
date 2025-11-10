@@ -1,0 +1,19 @@
+// teinit.c — TePhone OS Init
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+int main() {
+    printf("[TeInit] TePhone OS booting...\n");
+
+    // Servisleri başlat
+    system("/system/bin/tecored &");
+    system("/system/bin/teui_service &");
+
+    printf("[TeInit] All services started.\n");
+
+    // Sonsuz döngü ile sistemi canlı tut
+    while(1) sleep(10);
+
+    return 0;
+}
