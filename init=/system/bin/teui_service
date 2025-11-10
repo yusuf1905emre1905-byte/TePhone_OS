@@ -1,0 +1,12 @@
+// teui_service.c — TePhone OS UI Service
+#include <stdio.h>
+#include <unistd.h>
+
+int main() {
+    printf("[TeUI] TePhone OS boot screen active...\n");
+    sleep(3); // 3 saniye boot ekranı
+    printf("[TeUI] Boot screen finished. Launching TeHome...\n");
+    system("/system/bin/tehome &"); // Ana arayüzü başlatır
+    while(1) sleep(10);
+    return 0;
+}
