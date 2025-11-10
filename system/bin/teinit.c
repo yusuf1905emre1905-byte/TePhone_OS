@@ -1,59 +1,65 @@
-// teinit.c — TePhone OS Initial System Process
-// Author: TeOS Foundation
-// Version: 0.0.1-alpha
+// teui_service.c
+// TePhone OS – İlk Görsel Arayüz Servisi
+// © 2025 TeOS Project
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
-
-void start_service(const char *name, const char *cmd) {
-    printf("[TeInit] Starting %s...\n", name);
-    pid_t pid = fork();
-    if (pid == 0) {
-        execl("/bin/sh", "sh", "-c", cmd, NULL);
-        perror("execl");
-        exit(1);
-    }
-}
-
-void teos_logo() {
-    printf("\033[1;36m");
-    printf("\n====================================\n");
-    printf("        Welcome to TePhone OS       \n");
-    printf("          powered by TeOS           \n");
-    printf("====================================\n");
-    printf("\033[0m\n");
-}
+#include <linux/fb.h>
+#include <sys/mman.h>
+#include <sys/ioctl.h>
+#include <string.h>
+#include <unistd.h>
 
 int main() {
-    teos_logo();
-    printf("[TeInit] Boot sequence started.\n");
-
-    // Sistem dizinlerini kontrol et
-    mkdir("/data", 0755);
-    mkdir("/tmp", 0755);
-    mkdir("/system", 0755);
-
-    // Log dosyası
-    int fd = open("/data/boot.log", O_CREAT | O_WRONLY | O_APPEND, 0644);
-    if (fd >= 0) dup2(fd, STDOUT_FILENO);
-
-    // Servisleri başlat
-    start_service("TeCore", "/system/bin/tecored &");
-    start_service("TeDaemon", "/system/bin/tedaemon &");
-    start_service("TeUI", "/system/bin/teui_service &");
-
-    // Sistem hazır
-    printf("[TeInit] All core services started.\n");
-    printf("[TeInit] System entering idle mode.\n");
-
-    // Ana döngü — sistem canlı tut
-    while (1) {
-        sleep(10);
+    int fbfd = open("/dev/fb0", O_RDWR);
+    if (fbfd == -1) {
+        perror("Ekran cihazı açılamadı (/dev/fb0)");
+        return 1;
     }
+
+    struct fb_var_screeninfo vinfo;
+    if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo)) {
+        perror("Ekran bilgileri alınamadı");
+        close(fbfd);
+        return 1;
+    }
+
+    long screensize = vinfo.yres_virtual * vinfo.xres_virtual * vinfo.bits_per_pixel / 8;
+    char *fbp = (char *)mmap(0, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
+    if ((intptr_t)fbp == -1) {
+        perror("Ekran belleği eşlenemedi");
+        close(fbfd);
+        return 1;
+    }
+
+    // Ekranı siyah yap
+    memset(fbp, 0x00, screensize);
+
+    // Ortada beyaz bir "TePhone OS" yazısı (piksel bazlı)
+    int x, y;
+    int cx = vinfo.xres / 2;
+    int cy = vinfo.yres / 2;
+
+    // Basit bir yazı efekti (beyaz karelerle)
+    for (y = -40; y < 40; y++) {
+        for (x = -100; x < 100; x++) {
+            long location = (cx + x + vinfo.xoffset) * (vinfo.bits_per_pixel / 8) +
+                            (cy + y + vinfo.yoffset) * vinfo.line_length;
+
+            if (x % 10 == 0 || y % 20 == 0) { // Basit desen
+                *(fbp + location) = 0xFF;        // Blue
+                *(fbp + location + 1) = 0xFF;    // Green
+                *(fbp + location + 2) = 0xFF;    // Red
+            }
+        }
+    }
+
+    printf("TeUI: TePhone OS açılış ekranı çizildi.\n");
+
+    sleep(3); // 3 saniye göster
+    munmap(fbp, screensize);
+    close(fbfd);
 
     return 0;
 }
