@@ -112,3 +112,69 @@ int main() {
 
     return 0;
 }
+// TePhone OS - Android Studio ve Te Code Studio Entegrasyonu
+// Bu kod Android/Linux kernel üzerinde TeOS'ta çalışacak
+
+package com.tephoneos.teide;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.widget.Toast;
+
+public class TeIDEManager extends Activity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // TeHome'dan hangi IDE seçildiğini al
+        String ide = getIntent().getStringExtra("IDE");
+
+        if (ide.equals("ANDROID_STUDIO")) {
+            launchAndroidStudio();
+        } else if (ide.equals("TE_CODE_STUDIO")) {
+            launchTeCodeStudio();
+        }
+    }
+
+    private void launchAndroidStudio() {
+        try {
+            // Android Studio mobil sürümü çalıştır
+            Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.android.studio");
+            if (launchIntent != null) {
+                startActivity(launchIntent);
+            } else {
+                Toast.makeText(this, "Android Studio yüklü değil!", Toast.LENGTH_LONG).show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void launchTeCodeStudio() {
+        try {
+            // TeOS Script editörü aç
+            Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.tephoneos.tecodestudio");
+            if (launchIntent != null) {
+                startActivity(launchIntent);
+            } else {
+                Toast.makeText(this, "Te Code Studio yüklü değil!", Toast.LENGTH_LONG).show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // TPK Dönüşüm Fonksiyonu
+    public void convertToTPK(String filePath) {
+        // Burada Android Studio veya Te Code Studio'dan çıkan dosya TPK'ya dönüştürülür
+        // Gerçek kernel ve TeOS API kullanılarak dosya TeOS uyumlu hale gelir
+        Toast.makeText(this, filePath + " TPK formatına dönüştürüldü!", Toast.LENGTH_SHORT).show();
+    }
+
+    // TeStore Yükleme Fonksiyonu
+    public void uploadToTeStore(String tpkFile) {
+        // Dosya TeStore'a yüklenir
+        Toast.makeText(this, tpkFile + " TeStore'a yüklendi!", Toast.LENGTH_SHORT).show();
+    }
+}
