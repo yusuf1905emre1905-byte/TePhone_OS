@@ -316,3 +316,182 @@ public class TeIDEManager extends Activity {
         Toast.makeText(this, tpkFile + " TeStore’a yüklendi!", Toast.LENGTH_SHORT).show();
     }
 }
+package com.tephoneos.teapps;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.Toast;
+import java.io.File;
+import java.util.ArrayList;
+
+public class FilesApp extends Activity {
+
+    private ListView fileListView;
+    private ArrayList<String> fileNames = new ArrayList<>();
+    private String directoryPath = "/storage/emulated/0/"; // Ana dizin
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        fileListView = new ListView(this);
+        setContentView(fileListView);
+
+        loadFiles(directoryPath);
+
+        fileListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String selectedFile = fileNames.get(position);
+                openFile(selectedFile);
+            }
+        });
+    }
+
+    // Dosyaları yükle
+    private void loadFiles(String path) {
+        fileNames.clear();
+        File directory = new File(path);
+        File[] files = directory.listFiles();
+        if(files != null) {
+            for(File file : files) {
+                fileNames.add(file.getName());
+            }
+        }
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, fileNames);
+        fileListView.setAdapter(adapter);
+    }
+
+    // Dosya açma işlemi
+    private void openFile(String fileName) {
+        File file = new File(directoryPath + fileName);
+        if(file.exists()) {
+            Toast.makeText(this, fileName + " açıldı!", Toast.LENGTH_SHORT).show();
+            // Burada dosya tipi kontrolü yapılıp uygun uygulama ile açılabilir
+            // Örn: PDF → PDF Viewer, APK → TPK yükleme, Fotoğraf → Galeri
+        } else {
+            Toast.makeText(this, "Dosya bulunamadı!", Toast.LENGTH_SHORT).show();
+        }
+    }
+}
+package com.tephoneos.teapps;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.Toast;
+
+import java.io.File;
+import java.util.ArrayList;
+
+public class FilesApp extends Activity {
+
+    private ListView fileListView;
+    private ArrayList<String> fileNames = new ArrayList<>();
+    private String currentDirectory = "/storage/emulated/0/"; // Başlangıç dizini
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        fileListView = new ListView(this);
+        setContentView(fileListView);
+
+        loadFiles(currentDirectory);
+
+        fileListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String selectedFile = fileNames.get(position);
+                File file = new File(currentDirectory + selectedFile);
+                if(file.isDirectory()) {
+                    // Klasöre gir
+                    currentDirectory = file.getAbsolutePath() + "/";
+                    loadFiles(currentDirectory);
+                } else {
+                    openFile(file);
+                }
+            }
+        });
+
+        fileListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                String selectedFile = fileNames.get(position);
+                File file = new File(currentDirectory + selectedFile);
+                showFileOptions(file);
+                return true;
+            }
+        });
+    }
+
+    // Dosyaları yükle
+    private void loadFiles(String path) {
+        fileNames.clear();
+        File directory = new File(path);
+        File[] files = directory.listFiles();
+        if(files != null) {
+            for(File file : files) {
+                fileNames.add(file.getName());
+            }
+        }
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, fileNames);
+        fileListView.setAdapter(adapter);
+    }
+
+    // Dosya aç
+    private void openFile(File file) {
+        if(!file.exists()) {
+            Toast.makeText(this, "Dosya bulunamadı!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        Uri fileUri = Uri.fromFile(file);
+
+        // Basit dosya tipi kontrolü
+        String name = file.getName().toLowerCase();
+        if(name.endsWith(".pdf")) {
+            intent.setDataAndType(fileUri, "application/pdf");
+        } else if(name.endsWith(".jpg") || name.endsWith(".png")) {
+            intent.setDataAndType(fileUri, "image/*");
+        } else if(name.endsWith(".apk") || name.endsWith(".tpk")) {
+            // TPK yükleme veya APK yükleme işlemi
+            installTPK(fileUri);
+            return;
+        } else {
+            intent.setDataAndType(fileUri, "*/*");
+        }
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
+
+    // TPK / APK yükleme
+    private void installTPK(Uri fileUri) {
+        Toast.makeText(this, "TPK/ APK yükleme başlatıldı!", Toast.LENGTH_SHORT).show();
+        // Burada TeOS API kullanılarak TPK yüklemesi yapılır
+    }
+
+    // Uzun basınca seçenekler
+    private void showFileOptions(File file) {
+        // Sil ve Paylaş
+        if(file.exists()) {
+            // Silme
+            file.delete();
+            Toast.makeText(this, file.getName() + " silindi!", Toast.LENGTH_SHORT).show();
+            loadFiles(currentDirectory);
+
+            // Paylaşma
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("*/*");
+            shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+            startActivity(Intent.createChooser(shareIntent, "Paylaş:"));
+        }
+    }
+}
