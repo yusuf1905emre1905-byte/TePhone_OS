@@ -41,3 +41,45 @@ public class TeHomeTest extends Activity {
         } catch (Exception e) { e.printStackTrace(); }
     }
 }
+package com.tephoneos.tehome;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.widget.Toast;
+import com.tephoneos.teide.TPKAutoService;
+
+public class TeHomeLiveTest extends Activity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Canlı test için iki proje çalıştırılıyor
+        runLiveTest("/storage/emulated/0/TeProjects/MyApp.apk", "ANDROID_STUDIO");
+        runLiveTest("/storage/emulated/0/TeProjects/MyScript.tsc", "TE_CODE_STUDIO");
+    }
+
+    private void runLiveTest(String projectFile, String ide) {
+        try {
+            // IDE açılıyor
+            Intent ideIntent;
+            if(ide.equals("ANDROID_STUDIO")) {
+                ideIntent = getPackageManager().getLaunchIntentForPackage("com.android.studio");
+            } else {
+                ideIntent = getPackageManager().getLaunchIntentForPackage("com.tephoneos.tecodestudio");
+            }
+
+            if(ideIntent != null) startActivity(ideIntent);
+
+            // TPK otomatik servisi başlatılıyor
+            Intent serviceIntent = new Intent(this, TPKAutoService.class);
+            serviceIntent.putExtra("PROJECT_FILE", projectFile);
+            startService(serviceIntent);
+
+            // Kullanıcıya canlı bildirim
+            Toast.makeText(this, ide + " açıldı ve TPK servisi aktif!", Toast.LENGTH_SHORT).show();
+
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+}
