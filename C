@@ -77,3 +77,38 @@ int main() {
     convert_to_tpk("MyScript.tsc");
     return 0;
 }
+#include <stdio.h>
+#include <unistd.h> // sleep fonksiyonu için
+
+typedef enum { ANDROID_STUDIO, TE_CODE_STUDIO } IDEType;
+
+// Açılış animasyonu
+void launch_animation(IDEType ide) {
+    if(ide == ANDROID_STUDIO) {
+        printf("🟢 Launching Android Studio...\n");
+    } else {
+        printf("💻 Launching Te Code Studio...\n");
+    }
+    // Basit animasyon simülasyonu
+    for(int i=0;i<3;i++) {
+        printf("."); fflush(stdout);
+        sleep(1); // 1 saniye bekleme
+    }
+    printf("\n[TeUI] IDE ready!\n");
+}
+
+// Örnek TeHome açılışı
+void open_ide(IDEType ide) {
+    launch_animation(ide);
+    printf("[TeHome] IDE is now running.\n");
+}
+
+int main() {
+    // Kullanıcı Android Studio seçti
+    open_ide(ANDROID_STUDIO);
+
+    // Kullanıcı Te Code Studio seçti
+    open_ide(TE_CODE_STUDIO);
+
+    return 0;
+}
