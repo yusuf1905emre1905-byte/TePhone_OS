@@ -1,0 +1,19 @@
+#include <stdio.h>
+
+typedef enum { ANDROID_STUDIO, TE_CODE_STUDIO } IDEType;
+
+void open_ide(IDEType ide) {
+    if(ide == ANDROID_STUDIO) {
+        printf("Launching Android Studio...\n");
+        // Gerçek Android Studio açma kodu entegre edilecek
+    } else {
+        printf("Launching Te Code Studio...\n");
+        // TeOS Script editör açma kodu
+    }
+}
+
+int main() {
+    // Örnek: Android Studio aç
+    open_ide(ANDROID_STUDIO);
+    return 0;
+}
