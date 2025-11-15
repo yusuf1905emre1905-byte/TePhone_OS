@@ -41,3 +41,39 @@ int main() {
     convert_to_tpk("MyApp.apk");
     return 0;
 }
+#include <stdio.h>
+
+typedef enum { ANDROID_STUDIO, TE_CODE_STUDIO } IDEType;
+
+// TeHome üzerinden IDE açma fonksiyonu
+void launch_ide(IDEType ide) {
+    if(ide == ANDROID_STUDIO) {
+        printf("[TeHome] Launching real Android Studio...\n");
+        // Gerçek Android Studio entegrasyonu
+    } else {
+        printf("[TeHome] Launching Te Code Studio...\n");
+        // TeOS Script editör entegrasyonu
+    }
+}
+
+// TPK Dönüşüm Fonksiyonu
+void convert_to_tpk(char* file) {
+    printf("[TPK Converter] Converting %s to TPK format for TeOS...\n", file);
+    // APK veya TeOS Script → TPK dönüşümü
+}
+
+// Örnek kullanım
+int main() {
+    // Kullanıcı Android Studio seçti
+    launch_ide(ANDROID_STUDIO);
+
+    // APK → TPK dönüştürme örneği
+    convert_to_tpk("MyApp.apk");
+
+    // Kullanıcı Te Code Studio seçti
+    launch_ide(TE_CODE_STUDIO);
+
+    // Script → TPK dönüştürme örneği
+    convert_to_tpk("MyScript.tsc");
+    return 0;
+}
