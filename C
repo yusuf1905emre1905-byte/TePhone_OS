@@ -17,3 +17,27 @@ int main() {
     open_ide(ANDROID_STUDIO);
     return 0;
 }
+#include <stdio.h>
+
+typedef enum { ANDROID_STUDIO, TE_CODE_STUDIO } IDEType;
+
+void open_ide(IDEType ide) {
+    if(ide == ANDROID_STUDIO) {
+        printf("Launching Android Studio (real) on TeOS...\n");
+        // Gerçek Android Studio entegrasyonu
+    } else {
+        printf("Launching Te Code Studio...\n");
+        // TeOS Script editör entegrasyonu
+    }
+}
+
+void convert_to_tpk(char* file) {
+    printf("Converting %s to TPK for TeOS...\n", file);
+    // APK veya TeOS Script → TPK dönüşümü
+}
+
+int main() {
+    open_ide(ANDROID_STUDIO);
+    convert_to_tpk("MyApp.apk");
+    return 0;
+}
